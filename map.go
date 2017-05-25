@@ -1,66 +1,61 @@
 package mapgen
 
 import (
-	"github.com/jonbonazza/mapgen/pmrng"
 	"github.com/pzsz/voronoi"
-	"github.com/pzsz/voronoi/utils"
+	"image/color"
+	"image"
+	"math"
+	"math/rand"
+	"github.com/llgcode/draw2d/draw2dimg"
 )
 
-const (
-	NumRelaxIterations = 2
-)
+type Cell struct {
+	Index int
+	CenterDistance float64
+	NoiseLevel float64
+	Elevation float64
+	Land bool
+	Site voronoi.Vertex
+	FillColor color.RGBA
+	StrokeColor color.RGBA
+	Neighbors []*Cell
+}
 
 type Map struct {
-	centers []*Center
+	BoundingBox *BBox
+	Unit    float64
+	Cells   []*Cell
+	Diagram *Diagram
+	noise   *Noise
 }
 
-func NewMap(bbox voronoi.BBox, numPoints int) *Map {
-	verts := generateRandomVerts(bbox, numPoints)
-	diagram := voronoi.ComputeDiagram(relaxVerts(verts, bbox), bbox, true)
-	return &Map{
-
+func NewMap(bbox *BBox, siteCount, relaxPasses int, unit float64) *Map {
+	m := &Map{
+		BoundingBox: bbox,
+		Unit:    unit,
+		Cells:   make([]*Cell, 0),
+		Diagram: NewDiagram(*bbox.BBox, siteCount, relaxPasses),
+		noise:   NewNoise(rand.Int63n(int64(bbox.Width*bbox.Height))),
 	}
+	m.generateTopography()
+	return m
 }
 
-func (m *Map) buildGraph(verts []voronoi.Vertex, diagram *voronoi.Diagram) {
-	centers := make(map[*voronoi.Vertex]*Center)
-	for i, vertex := range verts {
-		center := &Center{
-			Index:    i,
-			Location: &vertex,
-			Neighbors: make([]*Center, 0),
-			Borders:  make([]*Edge, 0),
-			Corners: make([]*Corner, 0),
+func (m *Map) Image() image.Image {
+	img := image.NewRGBA(image.Rect(0, 0, int(m.BoundingBox.Width), int(m.BoundingBox.Height)))
+	ctx := draw2dimg.NewGraphicContext(img)
+	defer ctx.Close()
+	ctx.SetLineWidth(1.2)
+	for i, cell := range m.Diagram.Cells {
+		ctx.SetFillColor(m.Cells[i].FillColor)
+		ctx.SetStrokeColor(m.Cells[i].StrokeColor)
+		for _, hedge := range cell.Halfedges {
+			a := hedge.GetStartpoint()
+			b := hedge.GetEndpoint()
+			ctx.MoveTo(a.X, a.Y)
+			ctx.LineTo(b.X, b.Y)
 		}
-		m.centers = append(m.centers, center)
-		centers[&vertex] = center
+		ctx.FillStroke()
 	}
-	cornerMap := make(map[int][]*Corner)
-	for _, edge := range diagram.Edges {
-		e := &Edge{
-			Index: len(diagram.Edges),
-		}
-	}
-	corner := findCorner()
-}
-
-func findCorner(vert *voronoi.Vertex, cornerMap map[int][]*Corner) *Corner {
-	for bucket := int(vert.X)-1; bucket <= int(vert.X)+1; bucket++ {
-		for _, corner := range cornerMap[bucket] {
-			dx := vert.X - corner.Location.X
-			dy := vert.Y - corner.Location.Y
-			if dx*dx + dy*dy < 1e-6 {
-				return  corner
-			}
-		}
-	}
-	return nil
-}
-
-func relaxVerts(verts []voronoi.Vertex, bbox voronoi.BBox) []voronoi.Vertex {
-	for i := 0; i < NumRelaxIterations; i++ {
-		diagram := voronoi.ComputeDiagram(verts, bbox, true)
-		verts = utils.LloydRelaxation(diagram.Cells)
-	}
-	return verts
+	return img
 }
