@@ -14,8 +14,8 @@ func NewDiagram(bbox voronoi.BBox, count, relaxPasses int) *Diagram {
 	sites := utils.RandomSites(bbox, count)
 	sites = relax(sites, bbox, relaxPasses)
 	return &Diagram{
-		Diagram: voronoi.ComputeDiagram(sites,bbox, true),
-		Center: center(bbox),
+		Diagram: voronoi.ComputeDiagram(sites, bbox, true),
+		Center:  center(bbox),
 	}
 }
 
@@ -23,8 +23,8 @@ func center(bbox voronoi.BBox) voronoi.Vertex {
 	dx := bbox.Xr - bbox.Xl
 	dy := bbox.Yb - bbox.Yt
 	return voronoi.Vertex{
-		X: dx/2,
-		Y: dy/2,
+		X: dx / 2,
+		Y: dy / 2,
 	}
 }
 

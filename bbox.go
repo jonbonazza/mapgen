@@ -10,8 +10,8 @@ type BBox struct {
 func NewBBox(xl, xr, yt, yb float64) *BBox {
 	bb := voronoi.NewBBox(xl, xr, yt, yb)
 	return &BBox{
-		BBox: &bb,
-		Width: xr - xl,
+		BBox:   &bb,
+		Width:  xr - xl,
 		Height: yb - yt,
 	}
 }

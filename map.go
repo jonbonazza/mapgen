@@ -1,41 +1,41 @@
 package mapgen
 
 import (
-	"github.com/pzsz/voronoi"
-	"image/color"
-	"image"
-	"math"
-	"math/rand"
+	"bitbucket.org/s_l_teichmann/simplexnoise"
 	"github.com/llgcode/draw2d/draw2dimg"
+	"github.com/pzsz/voronoi"
+	"image"
+	"image/color"
+	"math/rand"
 )
 
 type Cell struct {
-	Index int
+	Index          int
 	CenterDistance float64
-	NoiseLevel float64
-	Elevation float64
-	Land bool
-	Site voronoi.Vertex
-	FillColor color.RGBA
-	StrokeColor color.RGBA
-	Neighbors []*Cell
+	NoiseLevel     float64
+	Elevation      float64
+	Land           bool
+	Site           voronoi.Vertex
+	FillColor      color.RGBA
+	StrokeColor    color.RGBA
+	Neighbors      []*Cell
 }
 
 type Map struct {
 	BoundingBox *BBox
-	Unit    float64
-	Cells   []*Cell
-	Diagram *Diagram
-	noise   *Noise
+	Unit        float64
+	Cells       []*Cell
+	Diagram     *Diagram
+	noise       *simplexnoise.SimplexNoise
 }
 
 func NewMap(bbox *BBox, siteCount, relaxPasses int, unit float64) *Map {
 	m := &Map{
 		BoundingBox: bbox,
-		Unit:    unit,
-		Cells:   make([]*Cell, 0),
-		Diagram: NewDiagram(*bbox.BBox, siteCount, relaxPasses),
-		noise:   NewNoise(rand.Int63n(int64(bbox.Width*bbox.Height))),
+		Unit:        unit,
+		Cells:       make([]*Cell, 0),
+		Diagram:     NewDiagram(*bbox.BBox, siteCount, relaxPasses),
+		noise:       simplexnoise.NewSimplexNoise(rand.Int63n(int64(bbox.Width * bbox.Height))),
 	}
 	m.generateTopography()
 	return m

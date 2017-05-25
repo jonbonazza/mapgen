@@ -1,15 +1,15 @@
 package main
 
 import (
+	"flag"
 	"github.com/jonbonazza/mapgen"
 	"image"
-	"os"
 	"image/png"
 	"log"
-	"math/rand"
-	"flag"
-	"time"
 	"math"
+	"math/rand"
+	"os"
+	"time"
 )
 
 func main() {
@@ -24,11 +24,11 @@ func main() {
 	flag.Int64Var(&seed, "seed", time.Now().Unix(), "")
 	flag.Float64Var(&width, "width", 512, "")
 	flag.Float64Var(&height, "height", 512, "")
-	flag.Float64Var(&height, "unit", 0, "")
+	flag.Float64Var(&unit, "unit", 0, "")
 	flag.Parse()
 	rand.Seed(seed)
 	if unit <= 0 {
-		unit = math.Min(width, height)/20.0
+		unit = math.Min(width, height) / 20.0
 	}
 	bbox := mapgen.NewBBox(0, width, 0, height)
 	m := mapgen.NewMap(bbox, points, it, unit)

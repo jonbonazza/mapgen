@@ -1,8 +1,8 @@
 package mapgen
 
 import (
-	"math/rand"
 	"github.com/pzsz/voronoi/utils"
+	"math/rand"
 )
 
 func (m *Map) generateTopography() {
@@ -16,12 +16,12 @@ func (m *Map) generateTopography() {
 		e := getElevation(m, d, n)
 
 		c := &Cell{
-			Index: i,
+			Index:          i,
 			CenterDistance: d,
-			NoiseLevel: n,
-			Elevation: e,
-			Land: e >= 0,
-			Site: cell.Site,
+			NoiseLevel:     n,
+			Elevation:      e,
+			Land:           e >= 0,
+			Site:           cell.Site,
 		}
 		if c.Land {
 			// Make sure edges of the map are water
